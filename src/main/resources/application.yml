@@ -1,2 +1,11 @@
 server:
   port: 7171
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    data-username: test_user
+    data-password: liqu4qn
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
