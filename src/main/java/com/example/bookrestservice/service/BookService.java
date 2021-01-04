@@ -23,11 +23,11 @@ public class BookService {
 
     // for test purposes
     public BookService() {
-        bookList.add(new Book(getId(), "title-1", "qwerty"));
-        bookList.add(new Book(getId(), "title-2", "asdfg"));
-        bookList.add(new Book(getId(), "title-3", "azxcv"));
-        bookList.add(new Book(getId(), "title-4", "poiuy"));
-        bookList.add(new Book(getId(), "title-5", "mnbvc"));
+//        bookList.add(new Book(getId(), "title-1", "qwerty"));
+//        bookList.add(new Book(getId(), "title-2", "asdfg"));
+//        bookList.add(new Book(getId(), "title-3", "azxcv"));
+//        bookList.add(new Book(getId(), "title-4", "poiuy"));
+//        bookList.add(new Book(getId(), "title-5", "mnbvc"));
     }
 
     Integer getId() {
@@ -59,9 +59,10 @@ public class BookService {
         return ResponseEntity.ok(bookList.stream().unordered().map(this::dtoFromBook).collect(Collectors.toList()));
     }
 
-    public ResponseEntity<?> getBookById(Integer id) {
+    public ResponseEntity<BookResponseDto> getBookById(Integer id) {
         if (checkBookExists(id - 1)) {
-            return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
+//            return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
+            throw new IllegalArgumentException("record not found");
         }
         return ResponseEntity.ok(dtoFromBook(bookList.get(id - 1)));
 

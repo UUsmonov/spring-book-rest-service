@@ -2,6 +2,7 @@ package com.example.bookrestservice.controller;
 
 import com.example.bookrestservice.model.request.BookRequestDto;
 import com.example.bookrestservice.service.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
     private final BookService bookService;
 
+    @Autowired
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
@@ -19,8 +21,8 @@ public class BookController {
         return bookService.getAllBooks();
     }
 
-    @GetMapping("/id")
-    public ResponseEntity<?> getBookById(@RequestParam("id") Integer id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBookById(@PathVariable("id") Integer id) {
         return bookService.getBookById(id);
     }
 
