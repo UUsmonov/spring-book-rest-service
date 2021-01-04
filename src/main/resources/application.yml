@@ -9,3 +9,8 @@ spring:
     data-password: liqu4qn
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    show-sql: true
+  h2:
+    console:
+      enabled: true
