@@ -1,7 +1,9 @@
 package com.example.bookrestservice.controller;
 
+import com.example.bookrestservice.model.request.BookRequestDto;
 import com.example.bookrestservice.model.response.BookResponseDto;
 import com.example.bookrestservice.service.BookService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -49,7 +51,31 @@ class BookControllerTest {
                 .perform(MockMvcRequestBuilders.get("/api/book/{id}", 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(2));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1));
 
+    }
+
+    @Test
+    void test_addBook_OK() throws Exception {
+
+        // prepare
+
+        // act
+        this.mockMvc.perform(MockMvcRequestBuilders
+                .post("/api/book/")
+                .content(asJsonString(new BookRequestDto(10, "123", "abc")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        //.andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
+
+    }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
