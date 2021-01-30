@@ -1,2 +1,6 @@
 server:
   port: 7171
+
+spring:
+  profiles:
+    active: dev

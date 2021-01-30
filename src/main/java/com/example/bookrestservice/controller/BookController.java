@@ -1,6 +1,6 @@
 package com.example.bookrestservice.controller;
 
-import com.example.bookrestservice.model.request.BookRequestDto;
+import com.example.bookrestservice.model.BookDto;
 import com.example.bookrestservice.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +27,12 @@ public class BookController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> addBook(@RequestBody BookRequestDto requestDto) {
+    public ResponseEntity<?> addBook(@RequestBody BookDto requestDto) {
         return bookService.addBook(requestDto);
     }
 
     @PutMapping
-    public ResponseEntity<?> editBook(@RequestBody BookRequestDto requestDto) {
+    public ResponseEntity<?> editBook(@RequestBody BookDto requestDto) {
         return bookService.editBook(requestDto);
     }
 

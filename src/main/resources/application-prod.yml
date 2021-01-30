@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:proddb
+    driver-class-name: org.h2.Driver
+    data-username: prod_user
+    data-password: 7x55p3z2387z
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    show-sql: true
+  h2:
+    console:
+      enabled: true

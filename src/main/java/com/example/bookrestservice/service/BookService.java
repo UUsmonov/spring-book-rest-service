@@ -1,49 +1,50 @@
 package com.example.bookrestservice.service;
 
+import com.example.bookrestservice.model.BookDto;
 import com.example.bookrestservice.model.Book;
-import com.example.bookrestservice.model.request.BookRequestDto;
-import com.example.bookrestservice.model.response.BookResponseDto;
+import com.example.bookrestservice.repo.BookRepo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.PostConstruct;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class BookService {
-    private final List<Book> bookList = new CopyOnWriteArrayList<>();
-    private final AtomicInteger counter = new AtomicInteger();
+    private final BookRepo bookRepo;
+
+    public BookService(BookRepo bookRepo) {
+        this.bookRepo = bookRepo;
+    }
 
     // for test purposes
-    public BookService() {
-//        bookList.add(new Book(getId(), "title-1", "qwerty"));
-//        bookList.add(new Book(getId(), "title-2", "asdfg"));
-//        bookList.add(new Book(getId(), "title-3", "azxcv"));
-//        bookList.add(new Book(getId(), "title-4", "poiuy"));
-//        bookList.add(new Book(getId(), "title-5", "mnbvc"));
+    @PostConstruct
+    public void init() {
+        if (bookRepo.findAll().isEmpty()) {
+            List<Book> bookList = new ArrayList<>();
+            bookList.add(new Book("book1", UUID.randomUUID().toString()));
+            bookList.add(new Book("book2", UUID.randomUUID().toString()));
+            bookList.add(new Book("book3", UUID.randomUUID().toString()));
+            bookList.add(new Book("book4", UUID.randomUUID().toString()));
+            bookList.add(new Book("book5", UUID.randomUUID().toString()));
+            bookList.add(new Book("book6", UUID.randomUUID().toString()));
+
+            bookRepo.saveAll(bookList);
+        }
     }
 
-    Integer getId() {
-        return counter.addAndGet(1);
-    }
-
-    Book bookFromDto(BookRequestDto requestDto) {
+    Book bookFromDto(BookDto requestDto) {
         return new Book(
-                getId(),
                 requestDto.getTitle(),
                 requestDto.getIsbn()
         );
     }
 
-    BookResponseDto dtoFromBook(Book book) {
-        return new BookResponseDto(
+    BookDto dtoFromBook(Book book) {
+        return new BookDto(
                 book.getId(),
                 book.getTitle(),
                 book.getIsbn(),
@@ -51,24 +52,22 @@ public class BookService {
         );
     }
 
-    boolean checkBookExists(Integer id) {
-        return Objects.isNull(id) || bookList.size() < id - 1;
-    }
-
     public ResponseEntity<?> getAllBooks() {
-        return ResponseEntity.ok(bookList.stream().unordered().map(this::dtoFromBook).collect(Collectors.toList()));
+        return ResponseEntity.ok(bookRepo.findAll().stream().unordered().map(this::dtoFromBook).collect(Collectors.toList()));
     }
 
-    public ResponseEntity<BookResponseDto> getBookById(Integer id) {
-        if (checkBookExists(id - 1)) {
-//            return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
+    public ResponseEntity<BookDto> getBookById(Integer id) {
+        if (Objects.isNull(id)) {
             throw new IllegalArgumentException("record not found");
         }
-        return ResponseEntity.ok(dtoFromBook(bookList.get(id - 1)));
-
+        Optional<Book> bookOptional = bookRepo.findById(id);
+        if (bookOptional.isEmpty()) {
+            throw new IllegalArgumentException("record not found");
+        }
+        return ResponseEntity.ok(dtoFromBook(bookOptional.get()));
     }
 
-    public ResponseEntity<?> addBook(BookRequestDto requestDto) {
+    public ResponseEntity<?> addBook(BookDto requestDto) {
         List<String> errorMessages = new ArrayList<>();
         boolean isSuccess = true;
         if (StringUtils.isEmpty(requestDto.getTitle())) {
@@ -85,25 +84,30 @@ public class BookService {
             return new ResponseEntity<>(Map.of("errorMessages", errorMessages), HttpStatus.BAD_REQUEST);
         }
         Book book = bookFromDto(requestDto);
-        bookList.add(book);
+        bookRepo.save(book);
         return ResponseEntity.ok(Map.of("message", "Successfully added"));
     }
 
-    public ResponseEntity<?> editBook(BookRequestDto requestDto) {
-        if (checkBookExists(requestDto.getId())) {
+    public ResponseEntity<?> editBook(BookDto requestDto) {
+        if (Objects.isNull(requestDto.getId())) {
             return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
         }
-        Book book = bookList.get(requestDto.getId() - 1);
+        Optional<Book> bookOptional = bookRepo.findById(requestDto.getId());
+        if (bookOptional.isEmpty()) {
+            return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
+        }
+        Book book = bookOptional.get();
         book.setTitle(StringUtils.isEmpty(requestDto.getTitle()) ? book.getTitle() : requestDto.getTitle());
         book.setIsbn(StringUtils.isEmpty(requestDto.getIsbn()) ? book.getIsbn() : requestDto.getIsbn());
+        bookRepo.save(book);
         return ResponseEntity.ok(Map.of("message", "Successfully edited"));
     }
 
     public ResponseEntity<?> deleteBookById(Integer id) {
-        if (checkBookExists(id)) {
+        if (Objects.isNull(id)) {
             return new ResponseEntity<>(Map.of("errorMessage", "Record not found"), HttpStatus.NOT_FOUND);
         }
-        bookList.remove(id - 1);
+        bookRepo.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Successfully deleted"));
     }
 }
